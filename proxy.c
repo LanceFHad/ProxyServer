@@ -5,6 +5,7 @@
 #define MAX_OBJECT_SIZE 102400
 #define NTHREADS 10
 #define SBUFSIZE 20
+#define LBUFSIZE 20
 
 /* You won't lose style points for including this long line in your code */
 static const char *user_agent_hdr = "User-Agent: Mozilla/5.0 (X11; Linux x86_64; rv:10.0.3) Gecko/20120305 Firefox/10.0.3\r\n";
@@ -30,6 +31,7 @@ void clienterror(int fd, char *cause, char *errnum,
 int indexOf(const char *str, const char toFind);
 int constructFirstLine(char *request, char *filename);
 sbuf_t sbuf;
+logBuf_t lbuf;
 
 	    
 void *thread(void *vargp)
@@ -43,15 +45,26 @@ void *thread(void *vargp)
     }
 }
 
+void *lbuf_run(void *vargp)
+{
+	while(1)
+	{
+		lbuf_remove(&lbuf);
+	}
+}
+
 int main(int argc, char **argv)
 {
     int i, listenfd, connfd;
+    int msglen = 0;
     socklen_t clientlen;
     struct sockaddr_storage clientaddr;
     pthread_t tid;
  
     listenfd = Open_listenfd(argv[1]);
-    sbuf_init(&sbuf, SBUFSIZE); 
+    sbuf_init(&sbuf, SBUFSIZE);
+    lbuf_init(&lbuf, LBUFSIZE);
+    Pthread_create(&tid, NULL, lbuf_run, NULL);
     
     for (i = 0; i < NTHREADS; i++) 
     { /* Create worker threads */ 	
@@ -62,6 +75,11 @@ int main(int argc, char **argv)
 		clientlen = sizeof(struct sockaddr_storage);
 		connfd = Accept(listenfd, (SA *) &clientaddr, &clientlen);
 		sbuf_insert(&sbuf, connfd); /* Insert connfd in buffer */
+		char* msg = "sending connection to a thread";
+		msglen = strlen(msg);
+		char* logmsg = malloc(msglen);
+		strncpy(logmsg, msg, msglen);
+		lbuf_insert(&lbuf, logmsg);
     }
 }
 /* $end main */
@@ -74,7 +92,7 @@ void doit(int fd)
 {
 	printf("beginning doit\n");
 	int client_fd = 0;
-	int sktErr = 0;
+	int msglen = 0;
 	int numHeaders = 0;
 	int reqLen = 0;
 	int tempLen = 0;
@@ -105,6 +123,10 @@ void doit(int fd)
 				"Proxy only implements GET");
 		return;
 	}
+	msglen = strlen(uri);
+	char* logmsg = malloc(msglen);
+	strncpy(logmsg, uri, msglen);
+	lbuf_insert(&lbuf, logmsg);
 	//Read the headers into our array we created above
 	//numHeaders will hold the current size
 	numHeaders = read_requesthdrs(&rio, headers);
@@ -150,7 +172,7 @@ void doit(int fd)
 	request[reqLen] = '\n';
 	reqLen++;
 	
-	sktErr = send(client_fd, request, reqLen, 0);
+	send(client_fd, request, reqLen, 0);
 	
 	while(recvLength < MAX_OBJECT_SIZE && done != 1)
 	{
@@ -164,7 +186,7 @@ void doit(int fd)
 			done = 1;
 		}
 	}
-	sktErr = rio_writen(fd, response, recvLength);
+	rio_writen(fd, response, recvLength);
 	for (int i = 0; i < numHeaders; i++)
 	{
 		free(headers[i].header);
