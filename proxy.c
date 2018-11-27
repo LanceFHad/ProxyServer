@@ -65,6 +65,11 @@ int main(int argc, char **argv)
     sbuf_init(&sbuf, SBUFSIZE);
     lbuf_init(&lbuf, LBUFSIZE);
     Pthread_create(&tid, NULL, lbuf_run, NULL);
+    char *msg = "Spinning up threadpool";
+    msglen = strlen(msg);
+    char *startmsg = calloc(msglen, sizeof(char));
+    strncpy(startmsg, msg, msglen);
+    lbuf_insert(&lbuf, startmsg);
     
     for (i = 0; i < NTHREADS; i++) 
     { /* Create worker threads */ 	
@@ -75,9 +80,9 @@ int main(int argc, char **argv)
 		clientlen = sizeof(struct sockaddr_storage);
 		connfd = Accept(listenfd, (SA *) &clientaddr, &clientlen);
 		sbuf_insert(&sbuf, connfd); /* Insert connfd in buffer */
-		char* msg = "sending connection to a thread";
+		char* msg = "sending connection to a thread\0";
 		msglen = strlen(msg);
-		char* logmsg = malloc(msglen);
+		char* logmsg = calloc(msglen, sizeof(char));
 		strncpy(logmsg, msg, msglen);
 		lbuf_insert(&lbuf, logmsg);
     }
@@ -124,7 +129,7 @@ void doit(int fd)
 		return;
 	}
 	msglen = strlen(uri);
-	char* logmsg = malloc(msglen);
+	char* logmsg = calloc(msglen, sizeof(char));
 	strncpy(logmsg, uri, msglen);
 	lbuf_insert(&lbuf, logmsg);
 	//Read the headers into our array we created above

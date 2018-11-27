@@ -74,8 +74,9 @@ void lbuf_remove(logBuf_t *lp)
     item = lp->buf[(++lp->front)%(lp->n)]; /* Remove the item */
     lp->front = (lp->front)%(lp->n);	   /* Reset the front pointer */
     FILE *logFile;
-    logFile = fopen("ProxyLog.txt", "w");
-    fprintf(logFile, "%s\n", item);
+    logFile = fopen("ProxyLog.txt", "a");
+    fprintf(logFile, "%s \n", item);
+    fclose(logFile);
     V(&lp->mutex);                         /* Unlock the buffer */
     V(&lp->slots);                         /* Announce available slot */
     free(item);

@@ -37,4 +37,31 @@ void lbuf_deinit(logBuf_t *lp);
 void lbuf_insert(logBuf_t *lp, char *item);
 void lbuf_remove(logBuf_t *lp);
 
+typedef struct
+{
+	int index;
+	char *website;
+	char *response;
+	struct CacheNode *next;
+} CacheNode;
+
+char *getCached(CacheNode* head, char *toFind)
+{
+	CacheNode *nextNode;
+	char *toRet;
+	nextNode = head;
+	toRet = head->response;
+	while (strcmp(nextNode->website, toFind) != 0)
+	{
+		nextNode = nextNode->next;
+		if (nextNode == NULL)
+		{
+			toRet = NULL;
+			break;
+		}
+		toRet = nextNode->response;
+	} 
+	return toRet;
+}
+
 #endif

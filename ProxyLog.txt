@@ -1,0 +1,25 @@
+Spinning up threadpool 
+sending connection to a thread 
+http://localhost:30226/home.html 
+sending connection to a thread 
+http://localhost:30226/csapp.c 
+sending connection to a thread 
+http://localhost:30226/tiny.c 
+sending connection to a thread 
+http://localhost:30226/godzilla.jpg 
+sending connection to a thread 
+http://localhost:30226/tiny 
+Spinning up threadpool 
+sending connection to a thread 
+http://localhost:17226/nop-file.txt 
+sending connection to a thread 
+http://localhost:4033/home.html 
+Spinning up threadpool 
+sending connection to a thread 
+http://localhost:16750/tiny.c 
+sending connection to a thread 
+http://localhost:16750/home.html 
+sending connection to a thread 
+http://localhost:16750/csapp.c 
+sending connection to a thread 
+http://localhost:16750/home.html 
