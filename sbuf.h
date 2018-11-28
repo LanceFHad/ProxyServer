@@ -40,6 +40,7 @@ void lbuf_remove(logBuf_t *lp);
 
 typedef struct
 {
+	int size;
 	char *website;
 	char *response;
 	struct CacheNode *next;
@@ -48,18 +49,19 @@ typedef struct
 typedef struct
 {
 	CacheNode *head;
+	int readcnt;
+	int writecnt;
 	int front;
 	int rear;
 	int currentSize;
-	int MaxSize;
-	sem_t mutex;
-	sem_t slots;
-	sem_t items;
+	int maxTotalSize;
+	int maxObjectSize;
+	sem_t outerQ, rsem, rmutex, wmutex, wsem;
 } Cache;
 
-void cacheInit(Cache *cache);
+void cacheInit(Cache *cache, int maxObjSize);
 void cacheDeinit(Cache *cache);
-char *cacheRetrieve(Cache *cache, char *toFind);
+char *cacheRead(Cache *cache, char *toFind);
 void cacheInsert(Cache *cache, CacheNode *toInsert);
 
 

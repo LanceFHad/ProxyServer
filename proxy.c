@@ -64,7 +64,7 @@ int main(int argc, char **argv)
     listenfd = Open_listenfd(argv[1]);
     sbuf_init(&sbuf, SBUFSIZE);
     lbuf_init(&lbuf, LBUFSIZE);
-    cacheInit(&cache);
+    cacheInit(&cache, MAX_OBJECT_SIZE);
     Pthread_create(&tid, NULL, lbuf_run, NULL);
     char *msg = "Spinning up threadpool";
     msglen = strlen(msg);
