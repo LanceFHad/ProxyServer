@@ -81,3 +81,29 @@ void lbuf_remove(logBuf_t *lp)
     V(&lp->slots);                         /* Announce available slot */
     free(item);
 }
+
+char *cacheRetrieve(Cache *cache, char* toFind)
+{
+	
+}
+
+void cacheInit(Cache *cache)
+{
+	cache->MaxSize = MAX_CACHE_SIZE;
+	cache->currentSize = 0;
+	cache->front = 0;
+	cache->head = 0;
+	Sem_init(&cache->mutex, 0, 1); 	//Semaphore for write locking
+	Sem_init(&cache->slots, 0, 10); //Semaphore for number of people allowed to read
+	Sem_init(&cache->items, 0, 0);  //Semaphore for locking readers out when writing
+}
+
+void cacheDeinit(Cache *cache)
+{
+	
+}
+
+void cacheInsert(Cache *cache, CacheNode *toInsert)
+{
+	
+}

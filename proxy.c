@@ -1,7 +1,6 @@
 #include <stdio.h>
 
 /* Recommended max cache and object sizes */
-#define MAX_CACHE_SIZE 1049000
 #define MAX_OBJECT_SIZE 102400
 #define NTHREADS 10
 #define SBUFSIZE 20
@@ -32,6 +31,7 @@ int indexOf(const char *str, const char toFind);
 int constructFirstLine(char *request, char *filename);
 sbuf_t sbuf;
 logBuf_t lbuf;
+Cache cache;
 
 	    
 void *thread(void *vargp)
@@ -64,6 +64,7 @@ int main(int argc, char **argv)
     listenfd = Open_listenfd(argv[1]);
     sbuf_init(&sbuf, SBUFSIZE);
     lbuf_init(&lbuf, LBUFSIZE);
+    cacheInit(&cache);
     Pthread_create(&tid, NULL, lbuf_run, NULL);
     char *msg = "Spinning up threadpool";
     msglen = strlen(msg);

@@ -1,5 +1,6 @@
 #ifndef SBUF
 #define SBUF
+#define MAX_CACHE_SIZE 1049000
 
 #include "csapp.h"
 
@@ -39,29 +40,27 @@ void lbuf_remove(logBuf_t *lp);
 
 typedef struct
 {
-	int index;
 	char *website;
 	char *response;
 	struct CacheNode *next;
 } CacheNode;
 
-char *getCached(CacheNode* head, char *toFind)
+typedef struct
 {
-	CacheNode *nextNode;
-	char *toRet;
-	nextNode = head;
-	toRet = head->response;
-	while (strcmp(nextNode->website, toFind) != 0)
-	{
-		nextNode = nextNode->next;
-		if (nextNode == NULL)
-		{
-			toRet = NULL;
-			break;
-		}
-		toRet = nextNode->response;
-	} 
-	return toRet;
-}
+	CacheNode *head;
+	int front;
+	int rear;
+	int currentSize;
+	int MaxSize;
+	sem_t mutex;
+	sem_t slots;
+	sem_t items;
+} Cache;
+
+void cacheInit(Cache *cache);
+void cacheDeinit(Cache *cache);
+char *cacheRetrieve(Cache *cache, char *toFind);
+void cacheInsert(Cache *cache, CacheNode *toInsert);
+
 
 #endif
