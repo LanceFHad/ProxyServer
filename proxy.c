@@ -103,6 +103,7 @@ void doit(int fd)
 	int reqLen = 0;
 	int tempLen = 0;
 	int recvLength = 0;
+	int cacheLength = 0;
 	int done = 0;
 	int recvHold = 0;
 	char portNum[DEFAULTPORT] = "80";
@@ -110,6 +111,8 @@ void doit(int fd)
 	char buf[MAXLINE], method[MAXLINE], uri[MAXLINE], version[MAXLINE];
 	char filename[MAXLINE] = "/", domain[MAXLINE];
 	char request[MAXLINE], *response = malloc(sizeof(char) * MAX_OBJECT_SIZE);
+	char cacheCheck[MAX_OBJECT_SIZE];
+	CacheNode *toInsert = malloc(sizeof(CacheNode));
 	HeaderPair headers[HEADER_LIST_SIZE];
 	rio_t rio;
 
@@ -121,6 +124,12 @@ void doit(int fd)
 	}
 	//printf("%s\n", buf);
 	sscanf(buf, "%s %s %s", method, uri, version);
+	cacheLength = cacheRetrieve(&cache, uri, cacheCheck);
+	if(cacheLength != 0)
+	{
+		rio_writen(fd, cacheCheck, cacheLength);
+		return;
+	}
 	//check for GET method
 	if (strcasecmp(method, "GET"))
 	{
@@ -192,6 +201,18 @@ void doit(int fd)
 			done = 1;
 		}
 	}
+	//If we had to open a connection to the actual server, create a CacheNode
+	//and insert it into the cache
+	toInsert->size = recvLength;
+	int cchePgSize = strlen(response);
+	int ccheSiteSize = strlen(uri);
+	toInsert->website = calloc(ccheSiteSize, sizeof(char));
+	toInsert->response = calloc(cchePgSize, sizeof(char));
+	strncpy(toInsert->website, uri, ccheSiteSize);
+	strncpy(toInsert->response, response, cchePgSize);
+	cacheInsert(&cache, toInsert);
+	//printf("looping on rio_writen");
+	//Then send the response back to the client
 	rio_writen(fd, response, recvLength);
 	for (int i = 0; i < numHeaders; i++)
 	{

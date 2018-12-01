@@ -61,8 +61,9 @@ typedef struct
 
 void cacheInit(Cache *cache, int maxObjSize);
 void cacheDeinit(Cache *cache);
-char *cacheRead(Cache *cache, char *toFind);
+int cacheRetrieve(Cache *cache, char *toFind, char* response);
 void cacheInsert(Cache *cache, CacheNode *toInsert);
+void cacheSetHead(Cache *cache, CacheNode *toInsert, CacheNode *prev);
 
 
 #endif
